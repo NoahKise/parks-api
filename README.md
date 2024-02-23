@@ -48,7 +48,36 @@ This is a web API that holds information about Oregon State Parks. First, a user
 * In your terminal, navigate to the "ParksApi" directory and run `dotnet ef database update` to create a local database schema seeded with a few parks.
 * To view the project in a web browser, navigate to the "ParksApi" directory and run `dotnet watch run`.
 
-## Endpoints
+## Token Authorization and Authentication
+
+In order to make any request to a parks endpoint, you must include a valid bearer token in the request header. In order to obtain a token, you must first register an account.
+
+* First, send a POST request to https://localhost:5001/accounts/register containing a body with the following format:
+```
+{
+  "email": "test@test.com",
+  "userName": "tester",
+  "password": "Test1234!"
+}
+```
+* Once you receive a successful response to account registration, sign in by making a POST request to https://localhost:5001/accounts/signIn containing a body with the following format:
+```
+{
+  "email": "test@test.com",
+  "password": "Test1234!"
+}
+```
+* If you've correctly entered your credentials you will receive a successful response containing a token, with the following format:
+```
+{
+  "status": "success",
+  "message": "test@test.com signed in",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiJmYTM1YjRkMy1jZmQ3LTQxOWItODVjYi1kMGE4MWVhMjFmY2EiLCJleHAiOjE3MDg3MzQ0MzEsImlzcyI6ImV4YW1wbGUtaXNzdWVyIiwiYXVkIjoiZXhhbXBsZS1hdWRpZW5jZSJ9.Ah9YlqCnb9fyk7W36FvAgYcreuLqHITPpE0ZMfwH4lM"
+}
+```
+* The access token is valid for 3 hours and is required in the header of any request to any parks endpoint.
+
+## Parks Endpoints
 
 ```
 GET https://localhost:5001/api/parks/
@@ -85,7 +114,8 @@ DELETE https://localhost:5001/api/parks/{id}
     "beachAccess": true
   }
   ```
-  * Note: userEmail in the request url must match the value of "user" in the request body for this request to be successful.
+ -   Note: userEmail in the request url and the value of "user" in the request body must both match the value of the "User" property contained in the database for the selected park object in order for this request to be successful.
+
  -   A DELETE request to https://localhost:5001/api/parks/{id}?user={userEmail} will delete the park object with the corresponding ParkId property.
       * Note: userEmail in the request url must match the value of the "User" property contained in the database for the selected park object in order for this request to be successful.
 
