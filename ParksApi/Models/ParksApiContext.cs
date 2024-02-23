@@ -23,7 +23,8 @@ namespace ParksApi.Models
             builder.Entity<Park>()
               .HasData(
                 new Park { ParkId = 1, Name = "Milo McIver" },
-                new Park { ParkId = 2, Name = "Nehalem Bay" }
+                new Park { ParkId = 2, Name = "Nehalem Bay" },
+                new Park { ParkId = 2, Name = "Oswald West" }
               );
         }
     }
