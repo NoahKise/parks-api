@@ -22,9 +22,9 @@ namespace ParksApi.Models
             });
             builder.Entity<Park>()
               .HasData(
-                new Park { ParkId = 1, Name = "Milo McIver" },
-                new Park { ParkId = 2, Name = "Nehalem Bay" },
-                new Park { ParkId = 2, Name = "Oswald West" }
+                new Park { ParkId = 1, Name = "Milo McIver", User = "noah@email.com", BeachAccess = false, Camping = true, DiscGolf = true, Kayaking = true },
+                new Park { ParkId = 2, Name = "Nehalem Bay", User = "noah@email.com", BeachAccess = true, Camping = true, DiscGolf = false, Kayaking = true },
+                new Park { ParkId = 3, Name = "Oswald West", User = "noah@email.com", BeachAccess = true, Camping = false, DiscGolf = false, Kayaking = false }
               );
         }
     }
