@@ -1,6 +1,6 @@
 # Oregon State Parks API
 
-#### By Noah Kise
+#### _By Noah Kise_
 
 #### A queryable API database of Oregon state parks.
 
@@ -128,8 +128,8 @@ DELETE https://localhost:5001/api/parks/{id}
 | DiscGolf  | boolean      | not required | Returns parks that have disc golf. |
 | Kayaking  | boolean      | not required | Returns parks that have kayaking. |
 | BeachAccess  | boolean      | not required | Returns parks that have beach access. |
-| Page  | Integer      | not required | Sets the page number, defaults to 1 |
-| PageSize | Integer | not required | Sets the number of results per page, defaults to four |
+| Page  | Integer      | not required | Sets the page number, defaults to 1. |
+| PageSize | Integer | not required | Sets the number of results per page, defaults to 4. |
 
 #### Example Queries
 
