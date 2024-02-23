@@ -1,65 +1,144 @@
-using ParksApi.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+using ParksApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-
-builder.Services.AddDbContext<ParksApiContext>(
-                  dbContextOptions => dbContextOptions
-                    .UseMySql(
-                      builder.Configuration["ConnectionStrings:DefaultConnection"],
-                      ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]
-                    )
-                  )
-                );
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<BurritoApiContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddAuthentication(options =>
+namespace ParksApi.Controllers
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ParksController : ControllerBase
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:ValidAudience"],
-        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
-    };
-});
+        private readonly ParksApiContext _db;
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+        public ParksController(ParksApiContext db)
+        {
+            _db = db;
+        }
 
-var app = builder.Build();
+        // GET: api/Parks
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Park>>> Get(string name, bool random, bool camping, bool discGolf, bool kayaking, bool beachAccess, int page = 1, int pageSize = 4)
+        {
+            IQueryable<Park> query = _db.Parks.AsQueryable();
+            if (random)
+            {
+                List<Park> allParks = await query.ToListAsync();
+                if (allParks.Count == 0)
+                {
+                    return NotFound();
+                }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+                List<Park> randomParks = allParks.OrderBy(x => Guid.NewGuid()).ToList();
+                Park randomPark = randomParks.First();
+
+                return Ok(new List<Park> { randomPark });
+            }
+            if (name != null)
+            {
+                query = query.Where(entry => entry.Name.Contains(name));
+            }
+            if (camping == true)
+            {
+                query = query.Where(entry => entry.Camping == true);
+            }
+            if (discGolf == true)
+            {
+                query = query.Where(entry => entry.DiscGolf == true);
+            }
+            if (kayaking == true)
+            {
+                query = query.Where(entry => entry.Kayaking == true);
+            }
+            if (beachAccess == true)
+            {
+                query = query.Where(entry => entry.BeachAccess == true);
+            }
+
+            int skipCount = (page - 1) * pageSize;
+
+            query = query.Skip(skipCount).Take(pageSize);
+
+            return await query.ToListAsync();
+        }
+
+        // GET: api/Parks/2
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Park>> GetPark(int id)
+        {
+            Park park = await _db.Parks.FindAsync(id);
+
+            if (park == null)
+            {
+                return NotFound();
+            }
+
+            return park;
+        }
+        // POST api/parks
+        [HttpPost]
+        public async Task<ActionResult<Park>> Post(Park park)
+        {
+            _db.Parks.Add(park);
+            await _db.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetPark), new { id = park.ParkId }, park);
+        }
+        // PUT: api/Parks/4
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, Park park, string user)
+        {
+            if (id != park.ParkId)
+            {
+                return BadRequest();
+            }
+
+            if (!ParkExists(id))
+            {
+                return NotFound();
+            }
+
+            if (user != park.User)
+            {
+                return Unauthorized();
+            }
+
+            _db.Parks.Update(park);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        private bool ParkExists(int id)
+        {
+            return _db.Parks.Any(e => e.ParkId == id);
+        }
+        // DELETE: api/Parks/3
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePark(int id, string user)
+        {
+            Park park = await _db.Parks.FindAsync(id);
+            if (park == null)
+            {
+                return NotFound();
+            }
+            if (user != park.User)
+            {
+                return Unauthorized();
+            }
+
+            _db.Parks.Remove(park);
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
+    }
 }
-else
-{
-    app.UseHttpsRedirection();
-}
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
