@@ -61,6 +61,7 @@ DELETE https://localhost:5001/api/parks/{id}
  -   A GET request to https://localhost:5001/api/parks will return all park objects.
  -   A GET request to https://localhost:5001/api/parks/{id} will return the park object with the corresponding ParkId property.
  -   A POST request to https://localhost:5001/api/parks will add a new park object to the database. Must contain a request body with the following format:
+ ```
     {
     "name": "string",
     "user": "string",
@@ -70,7 +71,9 @@ DELETE https://localhost:5001/api/parks/{id}
     "kayaking": true,
     "beachAccess": true
   }
+  ```
  -   A PUT request to https://localhost:5001/api/parks/{id}?user={userEmail} will edit the park object with the corresponding ParkId property. Must contain a request body with the following format:
+ ```
     {
     "parkId": 0,
     "name": "string",
@@ -81,6 +84,7 @@ DELETE https://localhost:5001/api/parks/{id}
     "kayaking": true,
     "beachAccess": true
   }
+  ```
   * Note: userEmail in the request url must match the value of "user" in the request body for this request to be successful.
  -   A DELETE request to https://localhost:5001/api/parks/{id}?user={userEmail} will delete the park object with the corresponding ParkId property.
       * Note: userEmail in the request url must match the value of the "User" property contained in the database for the selected park object in order for this request to be successful.
